@@ -1,0 +1,11 @@
+.root {
+
+}
+
+.message-container {
+
+}
+
+.message-container.bold {
+    -fx-font-weight: bold;
+}

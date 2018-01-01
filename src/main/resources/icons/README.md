@@ -1,0 +1,1 @@
+This application icon is designed by Freepik from [www.flaticon.com](www.flaticon.com)

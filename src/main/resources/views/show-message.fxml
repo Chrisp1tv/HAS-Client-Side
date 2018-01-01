@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Button?>
+<VBox stylesheets="/styles.css" styleClass="root" xmlns="http://javafx.com/javafx/8.0.112-ea"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="chv.has.controllers.ShowMessageController">
+    <ScrollPane fx:id="messageContainer" styleClass="message-container" />
+    <Button onAction="#handleCloseMessage" text="%closeMessage" />
+</VBox>
