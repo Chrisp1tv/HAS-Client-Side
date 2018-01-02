@@ -1,19 +1,24 @@
 package chv.has;
 
 import chv.has.controllers.ShowMessageController;
+import chv.has.model.Message;
 import chv.has.model.interfaces.MessageInterface;
 import dorkbox.systemTray.MenuItem;
 import dorkbox.systemTray.SystemTray;
 import dorkbox.util.SwingUtil;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,7 +30,13 @@ import java.util.ResourceBundle;
  * @author Christopher Anciaux
  */
 public class HAS extends Application {
+    private static final double minPercentageOfScreenSize = 0.2;
+
     private static final double maxPercentageOfScreenSize = 0.8;
+
+    private static double xOffset = 0;
+
+    private static double yOffset = 0;
 
     private Stage primaryStage;
 
@@ -67,12 +78,9 @@ public class HAS extends Application {
 
     private void setUpPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        this.primaryStage.initStyle(StageStyle.TRANSPARENT);
         this.primaryStage.setTitle(this.getI18nMessages().getString("applicationTitle"));
         this.primaryStage.getIcons().add(new Image(HAS.class.getResourceAsStream("/icons/icon.png")));
-
-        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-        this.primaryStage.setMaxHeight(visualBounds.getHeight() * HAS.maxPercentageOfScreenSize);
-        this.primaryStage.setMaxWidth(visualBounds.getWidth() * HAS.maxPercentageOfScreenSize);
     }
 
     private void setUpSystemTray() {
@@ -98,17 +106,46 @@ public class HAS extends Application {
                 FXMLLoader loader = new FXMLLoader();
                 loader.setResources(this.i18nMessages);
                 loader.setLocation(HAS.class.getResource("/views/show-message.fxml"));
-                VBox view = loader.load();
+
+                BorderPane view = loader.load();
+                this.setUpView(view);
+
+                Scene scene = new Scene(view);
+                scene.setFill(Color.TRANSPARENT);
 
                 this.showMessageController = loader.getController();
                 this.showMessageController.setHAS(this);
 
-                this.primaryStage.setScene(new Scene(view));
+                this.primaryStage.setScene(scene);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
         return this.showMessageController;
+    }
+
+    private void setUpView(BorderPane view) {
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        view.setMinHeight(visualBounds.getHeight() * HAS.minPercentageOfScreenSize);
+        view.setMinWidth(visualBounds.getWidth() * HAS.minPercentageOfScreenSize);
+        view.setMaxHeight(visualBounds.getHeight() * HAS.maxPercentageOfScreenSize);
+        view.setMaxWidth(visualBounds.getWidth() * HAS.maxPercentageOfScreenSize);
+
+        view.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffset = primaryStage.getX() - event.getScreenX();
+                yOffset = primaryStage.getY() - event.getScreenY();
+            }
+        });
+
+        view.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                primaryStage.setX(event.getScreenX() + xOffset);
+                primaryStage.setY(event.getScreenY() + yOffset);
+            }
+        });
     }
 }
