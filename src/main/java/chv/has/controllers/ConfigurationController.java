@@ -12,7 +12,7 @@ public class ConfigurationController extends BaseController {
 
     public void setUp() {
         if (null != this.getHAS()) {
-            this.hostTextField.setText(this.getHAS().getRabbitMQManager().getHost());
+            this.hostTextField.setText(this.getHAS().getRabbitMQManager().getConfiguration().getHost());
         }
     }
 
@@ -27,7 +27,7 @@ public class ConfigurationController extends BaseController {
             return;
         }
 
-        this.getHAS().getRabbitMQManager().setHost(this.hostTextField.getText());
+        this.getHAS().getRabbitMQManager().getConfiguration().setHost(this.hostTextField.getText());
         this.getHAS().closeSecondaryStage();
     }
 }

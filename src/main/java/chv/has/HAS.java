@@ -3,7 +3,10 @@ package chv.has;
 import chv.has.controllers.BaseController;
 import chv.has.controllers.ConfigurationController;
 import chv.has.controllers.ShowMessageController;
+import chv.has.exceptions.DisconnectedException;
+import chv.has.model.RabbitMQConfiguration;
 import chv.has.model.interfaces.MessageInterface;
+import chv.has.utils.RabbitMQConfigurationManager;
 import chv.has.utils.RabbitMQManager;
 import chv.has.utils.SystemTrayManager;
 import dorkbox.systemTray.SystemTray;
@@ -43,7 +46,9 @@ public class HAS extends Application {
 
     private SystemTray systemTray;
 
-    private RabbitMQManager rabbitMQManager;
+    private RabbitMQConfiguration RabbitMQConfiguration;
+
+    private RabbitMQManager RabbitMQManager;
 
     private ResourceBundle i18nMessages;
 
@@ -62,7 +67,7 @@ public class HAS extends Application {
         this.setUpPrimaryStage(primaryStage);
         this.setUpSecondaryStage();
         this.setUpSystemTray();
-        this.rabbitMQManager = new RabbitMQManager();
+        this.setUpRabbitMQ();
     }
 
     public void displayMessage(MessageInterface message) {
@@ -86,7 +91,11 @@ public class HAS extends Application {
     }
 
     public RabbitMQManager getRabbitMQManager() {
-        return this.rabbitMQManager;
+        return this.RabbitMQManager;
+    }
+
+    public chv.has.model.RabbitMQConfiguration getRabbitMQConfiguration() {
+        return this.RabbitMQConfiguration;
     }
 
     public ResourceBundle getI18nMessages() {
@@ -124,6 +133,17 @@ public class HAS extends Application {
         }
 
         SystemTrayManager.setUpSystemTray(this.systemTray, this.getActionPerformedOnAbout(), this.getActionPerformedOnConfiguration(), this.getActionPerformedOnQuit(), this.getI18nMessages());
+    }
+
+    private void setUpRabbitMQ() {
+        this.RabbitMQConfiguration = RabbitMQConfigurationManager.loadRabbitMQConfiguration();
+        this.RabbitMQManager = new RabbitMQManager(this.getRabbitMQConfiguration());
+
+        try {
+            this.RabbitMQManager.onMessage(this::displayMessage);
+        } catch (DisconnectedException e) {
+            // TODO
+        }
     }
 
     private ShowMessageController getShowMessageController() {
@@ -207,6 +227,8 @@ public class HAS extends Application {
     private ActionListener getActionPerformedOnQuit() {
         return e -> {
             this.systemTray.shutdown();
+            // TODO: find why RabbitMQManager prevents application stopping
+            this.RabbitMQManager.disconnect();
             Platform.exit();
         };
     }

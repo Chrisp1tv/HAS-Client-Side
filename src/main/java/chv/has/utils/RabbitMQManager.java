@@ -1,68 +1,156 @@
 package chv.has.utils;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import chv.has.exceptions.DisconnectedException;
+import chv.has.exceptions.RegistrationFailedException;
+import chv.has.model.RabbitMQConfiguration;
+import chv.has.model.communications.Registration;
+import chv.has.model.communications.RegistrationResponse;
+import chv.has.model.interfaces.MessageInterface;
+import chv.has.model.interfaces.OnMessageInterface;
+import com.google.gson.Gson;
+import com.rabbitmq.client.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeoutException;
 
 /**
  * @author Christopher Anciaux
  */
 public class RabbitMQManager {
-    private static final String DEFAULT_SERVER_HOST = "localhost";
+    public static final String DEFAULT_SERVER_HOST = "localhost";
 
-    private Connection RMQConnection;
+    private static final String REGISTRATION_QUEUE_NAME = "registration_queue";
 
-    private Channel RMQChannel;
+    private RabbitMQConfiguration configuration;
 
-    private String host = RabbitMQManager.DEFAULT_SERVER_HOST;
+    private Gson gson;
 
-    private boolean connected;
+    private Connection RabbitMQConnection;
 
-    public RabbitMQManager() {
+    private Channel RabbitMQChannel;
+
+    private BooleanProperty connected;
+
+    public RabbitMQManager(RabbitMQConfiguration configuration) {
+        this.configuration = configuration;
+        this.gson = new Gson();
+        this.connected = new SimpleBooleanProperty();
         this.initialize();
     }
 
-    public RabbitMQManager(String host) {
-        this.setHost(host);
-    }
-
-    public String getHost() {
-        return this.host;
-    }
-
-    public void setHost(String host) {
-        if (host.equals(this.getHost())) {
-            return;
-        }
-
-        this.host = host;
-        this.initialize();
-
+    public RabbitMQConfiguration getConfiguration() {
+        return this.configuration;
     }
 
     public boolean isConnected() {
+        return this.connected.get();
+    }
+
+    public BooleanProperty connectedProperty() {
         return this.connected;
     }
 
-    private void initialize() {
+    private void setConnected(boolean connected) {
+        this.connected.set(connected);
+    }
+
+    private void register() throws IOException, InterruptedException, RegistrationFailedException {
+        String replyQueueName = this.RabbitMQChannel.queueDeclare().getQueue();
+        String correlationID = UUID.randomUUID().toString();
+        BlockingQueue<String> responseContainer = new ArrayBlockingQueue<>(1);
+
+        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().correlationId(correlationID).replyTo(replyQueueName).build();
+
+        this.RabbitMQChannel.basicPublish("", RabbitMQManager.REGISTRATION_QUEUE_NAME, properties, this.getRegistrationJSON(this.configuration.getIdentificationName()).getBytes());
+        this.RabbitMQChannel.basicConsume(replyQueueName, true, new DefaultConsumer(this.RabbitMQChannel) {
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                responseContainer.add(new String(body, StandardCharsets.UTF_8));
+            }
+        });
+
+        RegistrationResponse registrationResponse = this.getRegistrationResponseFromJSON(responseContainer.take());
+
+        if (null == registrationResponse.getQueueName()) {
+            throw new RegistrationFailedException();
+        }
+
+        this.configuration.setSubscribedQueueName(registrationResponse.getQueueName());
+        this.configuration.setRegistered(true);
+    }
+
+    public void disconnect() {
+        if (this.isConnected()) {
+            return;
+        }
+
         try {
-            if (null != this.RMQConnection && null != this.RMQChannel) {
-                this.RMQChannel.close();
-                this.RMQConnection.close();
+            this.RabbitMQChannel.close();
+            this.RabbitMQConnection.close();
+        } catch (IOException | TimeoutException ignored) {
+            // TODO
+        }
+
+        this.setConnected(false);
+    }
+
+    public void onMessage(OnMessageInterface onMessage) throws DisconnectedException {
+        if (!this.isConnected()) {
+            throw new DisconnectedException();
+        }
+
+        try {
+            this.RabbitMQChannel.basicConsume(this.configuration.getSubscribedQueueName(), true, new DefaultConsumer(this.RabbitMQChannel) {
+                @Override
+                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                    onMessage.onMessage(getMessageFromJSON(new String(body, StandardCharsets.UTF_8)));
+                }
+            });
+        } catch (IOException e) {
+            throw new DisconnectedException();
+        }
+    }
+
+    private void initialize() {
+        this.configuration.hostProperty().addListener((observable, oldValue, newValue) -> this.initialize());
+
+        try {
+            if (null != this.RabbitMQConnection && null != this.RabbitMQChannel) {
+                this.disconnect();
             }
 
             ConnectionFactory connectionFactory = new ConnectionFactory();
-            connectionFactory.setHost(host);
+            connectionFactory.setHost(this.configuration.getHost());
 
-            this.RMQConnection = connectionFactory.newConnection();
-            this.RMQChannel = this.RMQConnection.createChannel();
+            this.RabbitMQConnection = connectionFactory.newConnection();
+            this.RabbitMQChannel = this.RabbitMQConnection.createChannel();
 
-            this.connected = true;
-        } catch (IOException | TimeoutException e) {
-            this.connected = false;
+            if (!this.configuration.isRegistered()) {
+                this.register();
+                RabbitMQConfigurationManager.saveRabbitMQConfiguration(this.configuration);
+            }
+
+            this.setConnected(true);
+        } catch (IOException | TimeoutException | InterruptedException | RegistrationFailedException e) {
+            this.setConnected(false);
         }
+    }
+
+    // TODO: Manage JSON exceptions
+    private String getRegistrationJSON(String identificationName) {
+        return this.gson.toJson(new Registration(identificationName));
+    }
+
+    private MessageInterface getMessageFromJSON(String JSON) {
+        return this.gson.fromJson(JSON, MessageInterface.class);
+    }
+
+    private RegistrationResponse getRegistrationResponseFromJSON(String JSON) {
+        return this.gson.fromJson(JSON, RegistrationResponse.class);
     }
 }
