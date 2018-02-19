@@ -22,7 +22,7 @@ public class ShowMessageController extends BaseController {
         this.messageContainer.setContent(new Text(this.message.getContent()));
 
         if (null != this.message.getColor()) {
-            this.messageContainer.getContent().setStyle("-fx-fill: #" + this.message.getColor() + ";");
+            this.messageContainer.getContent().setStyle("-fx-fill: " + this.message.getColor() + ";");
         }
 
         if (this.message.isBold()) {

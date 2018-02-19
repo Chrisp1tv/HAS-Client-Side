@@ -140,7 +140,7 @@ public class HAS extends Application {
         this.RabbitMQManager = new RabbitMQManager(this.getRabbitMQConfiguration());
 
         try {
-            this.RabbitMQManager.onMessage(this::displayMessage);
+            this.RabbitMQManager.onMessage(message -> Platform.runLater(() -> this.displayMessage(message)));
         } catch (DisconnectedException e) {
             // TODO
         }

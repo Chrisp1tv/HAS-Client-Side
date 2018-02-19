@@ -2,6 +2,7 @@ package chv.has.utils;
 
 import chv.has.exceptions.DisconnectedException;
 import chv.has.exceptions.RegistrationFailedException;
+import chv.has.model.Message;
 import chv.has.model.RabbitMQConfiguration;
 import chv.has.model.communications.Registration;
 import chv.has.model.communications.RegistrationResponse;
@@ -147,7 +148,7 @@ public class RabbitMQManager {
     }
 
     private MessageInterface getMessageFromJSON(String JSON) {
-        return this.gson.fromJson(JSON, MessageInterface.class);
+        return this.gson.fromJson(JSON, Message.class);
     }
 
     private RegistrationResponse getRegistrationResponseFromJSON(String JSON) {
