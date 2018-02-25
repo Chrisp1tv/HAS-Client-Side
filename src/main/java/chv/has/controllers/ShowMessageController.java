@@ -1,6 +1,7 @@
 package chv.has.controllers;
 
 import chv.has.model.interfaces.MessageInterface;
+import chv.has.utils.RabbitMQManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.text.Text;
@@ -30,6 +31,8 @@ public class ShowMessageController extends BaseController {
         } else {
             this.messageContainer.getStyleClass().remove("bold");
         }
+
+        this.getHAS().getPrimaryStage().setOnHiding(event -> this.getHAS().getRabbitMQManager().sendMessageStatus(RabbitMQManager.MESSAGE_STATUS_READ, this.message));
     }
 
     @FXML

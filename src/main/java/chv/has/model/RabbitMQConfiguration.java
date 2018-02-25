@@ -17,6 +17,8 @@ import java.io.Serializable;
 public class RabbitMQConfiguration implements Serializable {
     private StringProperty host;
 
+    private int id;
+
     private String identificationName;
 
     private BooleanProperty registered;
@@ -39,6 +41,14 @@ public class RabbitMQConfiguration implements Serializable {
 
     public void setHost(String host) {
         this.host.set(host);
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getIdentificationName() {
@@ -76,6 +86,7 @@ public class RabbitMQConfiguration implements Serializable {
 
     private void writeObject(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(this.getHost());
+        objectOutputStream.writeInt(this.getId());
         objectOutputStream.writeObject(this.getIdentificationName());
         objectOutputStream.writeBoolean(this.isRegistered());
         objectOutputStream.writeObject(this.getSubscribedQueueName());
@@ -84,6 +95,7 @@ public class RabbitMQConfiguration implements Serializable {
     private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
         this.initialize();
         this.setHost((String) objectInputStream.readObject());
+        this.setId(objectInputStream.readInt());
         this.setIdentificationName((String) objectInputStream.readObject());
         this.setRegistered(objectInputStream.readBoolean());
         this.setSubscribedQueueName((String) objectInputStream.readObject());

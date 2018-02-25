@@ -43,6 +43,6 @@ abstract public class RabbitMQConfigurationManager {
     }
 
     private static RabbitMQConfiguration getDefaultRabbitMQConfiguration() {
-        return new RabbitMQConfiguration(DEFAULT_USER_NAME);
+        return new RabbitMQConfiguration(RabbitMQConfigurationManager.DEFAULT_USER_NAME);
     }
 }

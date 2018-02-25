@@ -102,6 +102,10 @@ public class HAS extends Application {
         return this.i18nMessages;
     }
 
+    public Stage getPrimaryStage() {
+        return this.primaryStage;
+    }
+
     private void setUpPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.primaryStage.initStyle(StageStyle.TRANSPARENT);

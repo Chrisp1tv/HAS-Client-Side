@@ -4,6 +4,7 @@ import chv.has.exceptions.DisconnectedException;
 import chv.has.exceptions.RegistrationFailedException;
 import chv.has.model.Message;
 import chv.has.model.RabbitMQConfiguration;
+import chv.has.model.communications.MessageStatus;
 import chv.has.model.communications.Registration;
 import chv.has.model.communications.RegistrationResponse;
 import chv.has.model.interfaces.MessageInterface;
@@ -26,7 +27,13 @@ import java.util.concurrent.TimeoutException;
 public class RabbitMQManager {
     public static final String DEFAULT_SERVER_HOST = "localhost";
 
+    public static final String MESSAGE_STATUS_RECEIVED = "received";
+
+    public static final String MESSAGE_STATUS_READ = "seen";
+
     private static final String REGISTRATION_QUEUE_NAME = "registration_queue";
+
+    private static final String CAMPAIGNS_STATUS_EXCHANGE = "campaigns_status_exchange";
 
     private RabbitMQConfiguration configuration;
 
@@ -82,6 +89,7 @@ public class RabbitMQManager {
         }
 
         this.configuration.setSubscribedQueueName(registrationResponse.getQueueName());
+        this.configuration.setId(registrationResponse.getId());
         this.configuration.setRegistered(true);
     }
 
@@ -109,11 +117,22 @@ public class RabbitMQManager {
             this.RabbitMQChannel.basicConsume(this.configuration.getSubscribedQueueName(), true, new DefaultConsumer(this.RabbitMQChannel) {
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-                    onMessage.onMessage(getMessageFromJSON(new String(body, StandardCharsets.UTF_8)));
+                    MessageInterface message = getMessageFromJSON(new String(body, StandardCharsets.UTF_8));
+
+                    onMessage.onMessage(message);
+                    sendMessageStatus(RabbitMQManager.MESSAGE_STATUS_RECEIVED, message);
                 }
             });
         } catch (IOException e) {
             throw new DisconnectedException();
+        }
+    }
+
+    public void sendMessageStatus(String status, MessageInterface message) {
+        try {
+            this.RabbitMQChannel.basicPublish(RabbitMQManager.CAMPAIGNS_STATUS_EXCHANGE, "", null, this.getMessageStatusJSON(status, message).getBytes());
+        } catch (IOException ignored) {
+            // TODO
         }
     }
 
@@ -145,6 +164,10 @@ public class RabbitMQManager {
     // TODO: Manage JSON exceptions
     private String getRegistrationJSON(String identificationName) {
         return this.gson.toJson(new Registration(identificationName));
+    }
+
+    private String getMessageStatusJSON(String status, MessageInterface message) {
+        return this.gson.toJson(new MessageStatus(this.configuration.getId(), message.getId(), status));
     }
 
     private MessageInterface getMessageFromJSON(String JSON) {
