@@ -1,46 +1,45 @@
 package chv.has.controllers;
 
-import chv.has.model.interfaces.MessageInterface;
-import chv.has.utils.RabbitMQManager;
+import chv.has.utils.UserInterface.MessageInterface;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.text.Text;
 
 /**
  * @author Christopher Anciaux
  */
-public class ShowMessageController extends BaseController {
-    private MessageInterface message;
+public class ShowMessageController {
+    private MessageInterface userInterface;
 
     @FXML
     private ScrollPane messageContainer;
 
-    public void initializeInterface() {
-        if (null == this.message) {
-            return;
-        }
-
-        this.messageContainer.setContent(new Text(this.message.getContent()));
-
-        if (null != this.message.getColor()) {
-            this.messageContainer.getContent().setStyle("-fx-fill: " + this.message.getColor() + ";");
-        }
-
-        if (this.message.isBold()) {
-            this.messageContainer.getStyleClass().add("bold");
-        } else {
-            this.messageContainer.getStyleClass().remove("bold");
-        }
-
-        this.getHAS().getPrimaryStage().setOnHiding(event -> this.getHAS().getRabbitMQManager().sendMessageStatus(RabbitMQManager.MESSAGE_STATUS_READ, this.message));
-    }
+    @FXML
+    private Button closeForEverButton;
 
     @FXML
     private void handleCloseMessage() {
-        this.getHAS().closeCurrentMessage();
+        this.getUserInterface().close(false);
     }
 
-    public void setMessage(MessageInterface message) {
-        this.message = message;
+    @FXML
+    private void handleCloseMessageForEver() {
+        this.getUserInterface().close(true);
+    }
+
+    public ScrollPane getMessageContainer() {
+        return this.messageContainer;
+    }
+
+    public Button getCloseForEverButton() {
+        return this.closeForEverButton;
+    }
+
+    public MessageInterface getUserInterface() {
+        return this.userInterface;
+    }
+
+    public void setUserInterface(MessageInterface userInterface) {
+        this.userInterface = userInterface;
     }
 }

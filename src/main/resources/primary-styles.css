@@ -5,18 +5,27 @@
 }
 
 .main-container {
-    -fx-alignment: center;
+    -fx-padding: 5;
+    -fx-spacing: 5;
     -fx-background-color: rgba(255, 255, 255, 0.95);
     -fx-background-radius: 3px;
+    -fx-alignment: center;
 }
 
-.message-container, .message-container * {
+.message-container, .message-container > * {
     -fx-background-color: transparent;
 }
 
 .message-container {
+    -fx-fit-to-width: true;
+    -fx-hbar-policy: never;
 }
 
 .message-container.bold {
     -fx-font-weight: bold;
+}
+
+.message-buttons {
+    -fx-alignment: center;
+    -fx-spacing: 5;
 }

@@ -24,9 +24,11 @@ public interface MessageInterface {
 
     Date getEndDate();
 
+    boolean isEnded();
+
     void setEndDate(Date endDate);
 
-    int getRepetitionFrequency();
+    Integer getRepetitionFrequency();
 
     void setRepetitionFrequency(int repetitionFrequency);
 }

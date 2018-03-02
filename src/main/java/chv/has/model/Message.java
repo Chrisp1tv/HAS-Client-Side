@@ -18,7 +18,7 @@ public class Message implements MessageInterface {
 
     private Date endDate;
 
-    private int repetitionFrequency;
+    private Integer repetitionFrequency;
 
     public Message(int id, String content, String color, boolean bold, Date endDate, int repetitionFrequency) {
         this.id = id;
@@ -65,11 +65,15 @@ public class Message implements MessageInterface {
         return this.endDate;
     }
 
+    public boolean isEnded() {
+        return 0 >= this.getEndDate().compareTo(new Date());
+    }
+
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
-    public int getRepetitionFrequency() {
+    public Integer getRepetitionFrequency() {
         return this.repetitionFrequency;
     }
 
