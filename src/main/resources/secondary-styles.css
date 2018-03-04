@@ -18,3 +18,16 @@
 .about-view {
 
 }
+
+.about-view-box {
+    -fx-alignment: center;
+    -fx-spacing: 5;
+}
+
+.about-title {
+    -fx-font-size: 35;
+}
+
+.about-information {
+    -fx-font-weight: bold;
+}

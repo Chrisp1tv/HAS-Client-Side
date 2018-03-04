@@ -49,6 +49,8 @@ public class ConfigurationInterfaceManager extends AbstractUserInterfaceManager 
             this.controller = loader.getController();
 
             ((BorderPane) this.stage.getScene().getRoot()).setCenter(view);
+
+            this.stage.close(); // In case it is already open, we close it to resize the window automatically
             this.stage.show();
         } catch (IOException exception) {
             ErrorsInterfaceManager.displayGeneralErrorAlert(this.getHas().getI18nMessages());
@@ -66,7 +68,9 @@ public class ConfigurationInterfaceManager extends AbstractUserInterfaceManager 
             loader.setLocation(HAS.class.getResource("/views/configuration-root.fxml"));
 
             Scene scene = new Scene(loader.load());
+
             this.stage.setScene(scene);
+            this.stage.setResizable(false);
         } catch (IOException exception) {
             ErrorsInterfaceManager.displayGeneralErrorAlert(this.getHas().getI18nMessages());
             Logger.logException(exception);
