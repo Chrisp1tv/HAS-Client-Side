@@ -2,6 +2,7 @@ package chv.has.utils.UserInterface;
 
 import chv.has.HAS;
 import chv.has.controllers.ConfigurationController;
+import chv.has.utils.Logger;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -49,9 +50,9 @@ public class ConfigurationInterfaceManager extends AbstractUserInterfaceManager 
 
             ((BorderPane) this.stage.getScene().getRoot()).setCenter(view);
             this.stage.show();
-        } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
+        } catch (IOException exception) {
+            ErrorsInterfaceManager.displayGeneralErrorAlert(this.getHas().getI18nMessages());
+            Logger.logException(exception);
         }
     }
 
@@ -66,9 +67,9 @@ public class ConfigurationInterfaceManager extends AbstractUserInterfaceManager 
 
             Scene scene = new Scene(loader.load());
             this.stage.setScene(scene);
-        } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
+        } catch (IOException exception) {
+            ErrorsInterfaceManager.displayGeneralErrorAlert(this.getHas().getI18nMessages());
+            Logger.logException(exception);
         }
     }
 }

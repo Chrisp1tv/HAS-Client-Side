@@ -2,9 +2,11 @@ package chv.has;
 
 import chv.has.exceptions.DisconnectedException;
 import chv.has.model.RabbitMQConfiguration;
+import chv.has.utils.Logger;
 import chv.has.utils.RabbitMQConfigurationManager;
 import chv.has.utils.RabbitMQManager;
 import chv.has.utils.SystemTrayManager;
+import chv.has.utils.UserInterface.ErrorsInterfaceManager;
 import chv.has.utils.UserInterface.ConfigurationInterfaceManager;
 import chv.has.utils.UserInterface.MessageInterfaceManager;
 import dorkbox.systemTray.SystemTray;
@@ -40,9 +42,9 @@ public class HAS extends Application {
         Platform.setImplicitExit(false);
 
         this.i18nMessages = ResourceBundle.getBundle("translations/translations");
-        this.setUpInterface();
-        this.setUpSystemTray();
         this.setUpRabbitMQ();
+        this.setUpSystemTray();
+        this.setUpInterface();
     }
 
     public RabbitMQManager getRabbitMQManager() {
@@ -65,20 +67,33 @@ public class HAS extends Application {
     private void setUpSystemTray() {
         this.systemTray = SystemTray.get();
         if (null == this.systemTray) {
-            throw new RuntimeException();
+            ErrorsInterfaceManager.displayGeneralErrorAlert(this.i18nMessages);
         }
 
-        SystemTrayManager.setUpSystemTray(this.systemTray, this.getActionPerformedOnAbout(), this.getActionPerformedOnConfiguration(), this.getActionPerformedOnQuit(), this.getI18nMessages());
+        SystemTrayManager.setUpSystemTray(this.systemTray, this.getActionPerformedOnAbout(), this.getActionPerformedOnConfiguration(), this.getActionPerformedOnQuit(), this.getI18nMessages(), this.getRabbitMQManager());
     }
 
     private void setUpRabbitMQ() {
         this.rabbitMQConfiguration = RabbitMQConfigurationManager.loadRabbitMQConfiguration();
         this.rabbitMQManager = new RabbitMQManager(this.getRabbitMQConfiguration());
 
+        if (!this.rabbitMQManager.isConnected()) {
+            ErrorsInterfaceManager.displayConnectionErrorAlertIfNeeded(this.i18nMessages);
+        }
+
+        this.rabbitMQManager.connectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                ErrorsInterfaceManager.displayConnectionErrorAlertIfNeeded(this.i18nMessages);
+            } else {
+                ErrorsInterfaceManager.forgetConnectionError();
+            }
+        });
+
         try {
             this.rabbitMQManager.onMessage(message -> Platform.runLater(() -> this.messageInterfaceManager.displayMessage(message)));
-        } catch (DisconnectedException e) {
-            // TODO
+        } catch (DisconnectedException exception) {
+            ErrorsInterfaceManager.displayConnectionErrorAlertIfNeeded(this.i18nMessages);
+            Logger.logException(exception);
         }
     }
 
@@ -93,7 +108,6 @@ public class HAS extends Application {
     private ActionListener getActionPerformedOnQuit() {
         return e -> {
             this.systemTray.shutdown();
-            // TODO: find why rabbitMQManager prevents application stopping
             this.rabbitMQManager.disconnect();
             Platform.exit();
         };

@@ -68,7 +68,7 @@ public class RabbitMQManager {
         this.connected.set(connected);
     }
 
-    private void register() throws IOException, InterruptedException, RegistrationFailedException {
+    private void register() throws Exception {
         String replyQueueName = this.RabbitMQChannel.queueDeclare().getQueue();
         String correlationID = UUID.randomUUID().toString();
         BlockingQueue<String> responseContainer = new ArrayBlockingQueue<>(1);
@@ -94,18 +94,24 @@ public class RabbitMQManager {
     }
 
     public void disconnect() {
-        if (this.isConnected()) {
+        this.disconnect(false);
+    }
+
+    private void disconnect(boolean changeConnectedStatus) {
+        if (!this.isConnected()) {
             return;
         }
 
         try {
             this.RabbitMQChannel.close();
             this.RabbitMQConnection.close();
-        } catch (IOException | TimeoutException ignored) {
-            // TODO
+        } catch (IOException | TimeoutException exception) {
+            Logger.logException(exception);
         }
 
-        this.setConnected(false);
+        if (changeConnectedStatus) {
+            this.setConnected(false);
+        }
     }
 
     public void onMessage(OnMessageInterface onMessage) throws DisconnectedException {
@@ -117,10 +123,14 @@ public class RabbitMQManager {
             this.RabbitMQChannel.basicConsume(this.configuration.getSubscribedQueueName(), true, new DefaultConsumer(this.RabbitMQChannel) {
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-                    MessageInterface message = getMessageFromJSON(new String(body, StandardCharsets.UTF_8));
+                    try {
+                        MessageInterface message = getMessageFromJSON(new String(body, StandardCharsets.UTF_8));
 
-                    onMessage.onMessage(message);
-                    sendMessageStatus(RabbitMQManager.MESSAGE_STATUS_RECEIVED, message);
+                        onMessage.onMessage(message);
+                        sendMessageStatus(RabbitMQManager.MESSAGE_STATUS_RECEIVED, message);
+                    } catch (Exception e) {
+                        Logger.logException(e);
+                    }
                 }
             });
         } catch (IOException e) {
@@ -131,8 +141,8 @@ public class RabbitMQManager {
     public void sendMessageStatus(String status, MessageInterface message) {
         try {
             this.RabbitMQChannel.basicPublish(RabbitMQManager.CAMPAIGNS_STATUS_EXCHANGE, "", null, this.getMessageStatusJSON(status, message).getBytes());
-        } catch (IOException ignored) {
-            // TODO
+        } catch (Exception exception) {
+            Logger.logException(exception);
         }
     }
 
@@ -141,7 +151,7 @@ public class RabbitMQManager {
 
         try {
             if (null != this.RabbitMQConnection && null != this.RabbitMQChannel) {
-                this.disconnect();
+                this.disconnect(false);
             }
 
             ConnectionFactory connectionFactory = new ConnectionFactory();
@@ -152,16 +162,16 @@ public class RabbitMQManager {
 
             if (!this.configuration.isRegistered()) {
                 this.register();
-                RabbitMQConfigurationManager.saveRabbitMQConfiguration(this.configuration);
             }
 
+            RabbitMQConfigurationManager.saveRabbitMQConfiguration(this.configuration);
             this.setConnected(true);
-        } catch (IOException | TimeoutException | InterruptedException | RegistrationFailedException e) {
+        } catch (Exception exception) {
+            Logger.logException(exception);
             this.setConnected(false);
         }
     }
 
-    // TODO: Manage JSON exceptions
     private String getRegistrationJSON(String identificationName) {
         return this.gson.toJson(new Registration(identificationName));
     }

@@ -2,6 +2,7 @@ package chv.has.utils.UserInterface;
 
 import chv.has.HAS;
 import chv.has.controllers.ShowMessageController;
+import chv.has.utils.Logger;
 import chv.has.utils.RabbitMQManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -86,9 +87,9 @@ public class MessageInterface {
 
             this.setUpInterface(view);
             this.stage.setScene(scene);
-        } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
+        } catch (IOException exception) {
+            ErrorsInterfaceManager.displayGeneralErrorAlert(this.messageInterfaceManager.getHas().getI18nMessages());
+            Logger.logException(exception);
         }
     }
 

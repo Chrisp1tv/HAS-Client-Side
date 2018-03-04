@@ -66,7 +66,7 @@ public class Message implements MessageInterface {
     }
 
     public boolean isEnded() {
-        return 0 >= this.getEndDate().compareTo(new Date());
+        return null == this.getEndDate() || 0 >= this.getEndDate().compareTo(new Date());
     }
 
     public void setEndDate(Date endDate) {

@@ -25,6 +25,8 @@ abstract public class RabbitMQConfigurationManager {
             RabbitMQConfiguration = (RabbitMQConfiguration) objectInputStream.readObject();
             objectInputStream.close();
         } catch (IOException | ClassNotFoundException e) {
+            Logger.logException(e);
+
             return RabbitMQConfigurationManager.getDefaultRabbitMQConfiguration();
         }
 
