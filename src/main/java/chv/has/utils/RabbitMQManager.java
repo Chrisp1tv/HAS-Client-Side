@@ -31,9 +31,9 @@ public class RabbitMQManager {
 
     public static final String MESSAGE_STATUS_READ = "seen";
 
-    private static final String REGISTRATION_QUEUE_NAME = "registration_queue";
+    private static final String REGISTRATION_EXCHANGE_NAME = "has_registration_exchange";
 
-    private static final String CAMPAIGNS_STATUS_EXCHANGE = "campaigns_status_exchange";
+    private static final String CAMPAIGNS_STATUS_EXCHANGE = "has_campaigns_status_exchange";
 
     private RabbitMQConfiguration configuration;
 
@@ -75,7 +75,7 @@ public class RabbitMQManager {
 
         AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().correlationId(correlationID).replyTo(replyQueueName).build();
 
-        this.RabbitMQChannel.basicPublish("", RabbitMQManager.REGISTRATION_QUEUE_NAME, properties, this.getRegistrationJSON(this.configuration.getIdentificationName()).getBytes());
+        this.RabbitMQChannel.basicPublish(RabbitMQManager.REGISTRATION_EXCHANGE_NAME, "", properties, this.getRegistrationJSON(this.configuration.getIdentificationName()).getBytes());
         this.RabbitMQChannel.basicConsume(replyQueueName, true, new DefaultConsumer(this.RabbitMQChannel) {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                 responseContainer.add(new String(body, StandardCharsets.UTF_8));
