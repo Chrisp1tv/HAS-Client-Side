@@ -10,7 +10,7 @@ import java.util.Map;
  * @author Christopher Anciaux
  */
 public class MessageInterfaceManager extends AbstractUserInterfaceManager {
-    private Map<MessageInterface, chv.has.utils.UserInterface.MessageInterface> handledMessages;
+    protected Map<MessageInterface, chv.has.utils.UserInterface.MessageInterface> handledMessages;
 
     public MessageInterfaceManager(HAS has) {
         super(has);

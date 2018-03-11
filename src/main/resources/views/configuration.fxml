@@ -7,7 +7,7 @@
       xmlns="http://javafx.com/javafx/8.0.112-ea" fx:controller="chv.has.controllers.ConfigurationController">
     <GridPane styleClass="configuration-grid">
         <Label text="%hostAddress"/>
-        <TextField fx:id="hostTextField" GridPane.columnIndex="1" />
+        <TextField fx:id="hostTextField" GridPane.columnIndex="1"/>
     </GridPane>
     <ButtonBar>
         <buttons>

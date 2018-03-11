@@ -4,9 +4,9 @@ package chv.has.model.communications;
  * @author Christopher Anciaux
  */
 public class RegistrationResponse {
-    private int id;
+    protected int id;
 
-    private String queueName;
+    protected String queueName;
 
     public RegistrationResponse(int id, String queueName) {
         this.id = id;

@@ -6,7 +6,7 @@ import chv.has.HAS;
  * @author Christopher Anciaux
  */
 abstract public class AbstractUserInterfaceManager {
-    private HAS has;
+    protected HAS has;
 
     AbstractUserInterfaceManager(HAS has) {
         this.setHas(has);

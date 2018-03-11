@@ -4,11 +4,11 @@ package chv.has.model.communications;
  * @author Christopher Anciaux
  */
 public class MessageStatus {
-    private int recipientId;
+    protected int recipientId;
 
-    private int campaignId;
+    protected int campaignId;
 
-    private String status;
+    protected String status;
 
     public MessageStatus(int recipientId, int campaignId, String status) {
         this.recipientId = recipientId;
@@ -17,7 +17,7 @@ public class MessageStatus {
     }
 
     public int getRecipientId() {
-        return recipientId;
+        return this.recipientId;
     }
 
     public void setRecipientId(int recipientId) {
@@ -25,7 +25,7 @@ public class MessageStatus {
     }
 
     public int getCampaignId() {
-        return campaignId;
+        return this.campaignId;
     }
 
     public void setCampaignId(int campaignId) {
@@ -33,7 +33,7 @@ public class MessageStatus {
     }
 
     public String getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(String status) {

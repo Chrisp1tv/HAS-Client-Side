@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
  * @author Christopher Anciaux
  */
 abstract public class ErrorsInterfaceManager {
-    private static boolean CONNECTION_ERROR_ALREADY_DISPLAYED = false;
+    protected static boolean CONNECTION_ERROR_ALREADY_DISPLAYED = false;
 
     public static void displayGeneralErrorAlert(ResourceBundle i18nMessages) {
         ErrorsInterfaceManager.displayErrorAlert(i18nMessages.getString("error"), i18nMessages.getString("generalError"), i18nMessages.getString("generalErrorOccurred"));
@@ -27,7 +27,7 @@ abstract public class ErrorsInterfaceManager {
         ErrorsInterfaceManager.CONNECTION_ERROR_ALREADY_DISPLAYED = false;
     }
 
-    private static void displayErrorAlert(String title, String headerText, String contentText) {
+    protected static void displayErrorAlert(String title, String headerText, String contentText) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
 
         alert.setTitle(title);

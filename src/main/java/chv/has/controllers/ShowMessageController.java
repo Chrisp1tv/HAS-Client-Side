@@ -9,23 +9,13 @@ import javafx.scene.control.ScrollPane;
  * @author Christopher Anciaux
  */
 public class ShowMessageController {
-    private MessageInterface userInterface;
+    protected MessageInterface userInterface;
 
     @FXML
-    private ScrollPane messageContainer;
+    protected ScrollPane messageContainer;
 
     @FXML
-    private Button closeForEverButton;
-
-    @FXML
-    private void handleCloseMessage() {
-        this.getUserInterface().close(false);
-    }
-
-    @FXML
-    private void handleCloseMessageForEver() {
-        this.getUserInterface().close(true);
-    }
+    protected Button closeForEverButton;
 
     public ScrollPane getMessageContainer() {
         return this.messageContainer;
@@ -41,5 +31,15 @@ public class ShowMessageController {
 
     public void setUserInterface(MessageInterface userInterface) {
         this.userInterface = userInterface;
+    }
+
+    @FXML
+    protected void handleCloseMessage() {
+        this.getUserInterface().close(false);
+    }
+
+    @FXML
+    protected void handleCloseMessageForEver() {
+        this.getUserInterface().close(true);
     }
 }

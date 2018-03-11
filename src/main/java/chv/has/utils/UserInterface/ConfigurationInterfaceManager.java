@@ -16,9 +16,9 @@ import java.io.IOException;
  * @author Christopher Anciaux
  */
 public class ConfigurationInterfaceManager extends AbstractUserInterfaceManager {
-    private ConfigurationController controller;
+    protected ConfigurationController controller;
 
-    private Stage stage;
+    protected Stage stage;
 
     public ConfigurationInterfaceManager(HAS has) {
         super(has);
@@ -39,7 +39,7 @@ public class ConfigurationInterfaceManager extends AbstractUserInterfaceManager 
         this.stage.close();
     }
 
-    private void show(String viewFile) {
+    protected void show(String viewFile) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setResources(this.getHas().getI18nMessages());
@@ -58,7 +58,7 @@ public class ConfigurationInterfaceManager extends AbstractUserInterfaceManager 
         }
     }
 
-    private void setUpStage() {
+    protected void setUpStage() {
         this.stage = new Stage();
         this.stage.setTitle(this.getHas().getI18nMessages().getString("applicationTitle"));
         this.stage.getIcons().add(new Image(HAS.class.getResourceAsStream("/icons/icon.png")));

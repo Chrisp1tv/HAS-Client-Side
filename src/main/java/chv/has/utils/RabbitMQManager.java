@@ -31,19 +31,21 @@ public class RabbitMQManager {
 
     public static final String MESSAGE_STATUS_READ = "seen";
 
-    private static final String REGISTRATION_EXCHANGE_NAME = "has_registration_exchange";
+    protected static final String REGISTRATION_EXCHANGE_NAME = "has_registration_exchange";
 
-    private static final String CAMPAIGNS_STATUS_EXCHANGE = "has_campaigns_status_exchange";
+    protected static final String CAMPAIGNS_STATUS_EXCHANGE = "has_campaigns_status_exchange";
 
-    private RabbitMQConfiguration configuration;
+    protected RabbitMQConfiguration configuration;
 
-    private Gson gson;
+    protected Gson gson;
 
-    private Connection RabbitMQConnection;
+    protected Connection RabbitMQConnection;
 
-    private Channel RabbitMQChannel;
+    protected Channel RabbitMQChannel;
 
-    private BooleanProperty connected;
+    protected BooleanProperty connected;
+
+    protected boolean hostPropertyListened;
 
     public RabbitMQManager(RabbitMQConfiguration configuration) {
         this.configuration = configuration;
@@ -64,11 +66,11 @@ public class RabbitMQManager {
         return this.connected;
     }
 
-    private void setConnected(boolean connected) {
+    protected void setConnected(boolean connected) {
         this.connected.set(connected);
     }
 
-    private void register() throws Exception {
+    protected void register() throws Exception {
         String replyQueueName = this.RabbitMQChannel.queueDeclare().getQueue();
         String correlationID = UUID.randomUUID().toString();
         BlockingQueue<String> responseContainer = new ArrayBlockingQueue<>(1);
@@ -97,7 +99,7 @@ public class RabbitMQManager {
         this.disconnect(false);
     }
 
-    private void disconnect(boolean changeConnectedStatus) {
+    protected void disconnect(boolean changeConnectedStatus) {
         if (!this.isConnected()) {
             return;
         }
@@ -124,10 +126,10 @@ public class RabbitMQManager {
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                     try {
-                        MessageInterface message = getMessageFromJSON(new String(body, StandardCharsets.UTF_8));
+                        MessageInterface message = RabbitMQManager.this.getMessageFromJSON(new String(body, StandardCharsets.UTF_8));
 
                         onMessage.onMessage(message);
-                        sendMessageStatus(RabbitMQManager.MESSAGE_STATUS_RECEIVED, message);
+                        RabbitMQManager.this.sendMessageStatus(RabbitMQManager.MESSAGE_STATUS_RECEIVED, message);
                     } catch (Exception e) {
                         Logger.logException(e);
                     }
@@ -146,8 +148,8 @@ public class RabbitMQManager {
         }
     }
 
-    private void initialize() {
-        this.configuration.hostProperty().addListener((observable, oldValue, newValue) -> this.initialize());
+    protected void initialize() {
+        this.listenHostChanges();
 
         try {
             if (null != this.RabbitMQConnection && null != this.RabbitMQChannel) {
@@ -172,19 +174,28 @@ public class RabbitMQManager {
         }
     }
 
-    private String getRegistrationJSON(String identificationName) {
+    protected void listenHostChanges() {
+        if (this.hostPropertyListened) {
+            return;
+        }
+
+        this.configuration.hostProperty().addListener((observable, oldValue, newValue) -> this.initialize());
+        this.hostPropertyListened = true;
+    }
+
+    protected String getRegistrationJSON(String identificationName) {
         return this.gson.toJson(new Registration(identificationName));
     }
 
-    private String getMessageStatusJSON(String status, MessageInterface message) {
+    protected String getMessageStatusJSON(String status, MessageInterface message) {
         return this.gson.toJson(new MessageStatus(this.configuration.getId(), message.getId(), status));
     }
 
-    private MessageInterface getMessageFromJSON(String JSON) {
+    protected MessageInterface getMessageFromJSON(String JSON) {
         return this.gson.fromJson(JSON, Message.class);
     }
 
-    private RegistrationResponse getRegistrationResponseFromJSON(String JSON) {
+    protected RegistrationResponse getRegistrationResponseFromJSON(String JSON) {
         return this.gson.fromJson(JSON, RegistrationResponse.class);
     }
 }

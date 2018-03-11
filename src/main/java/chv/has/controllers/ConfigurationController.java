@@ -8,10 +8,10 @@ import javafx.scene.control.TextField;
  * @author Christopher Anciaux
  */
 public class ConfigurationController {
-    private ConfigurationInterfaceManager configurationInterface;
+    protected ConfigurationInterfaceManager configurationInterface;
 
     @FXML
-    private TextField hostTextField;
+    protected TextField hostTextField;
 
     public void setUp() {
         if (null != this.configurationInterface) {
@@ -24,12 +24,12 @@ public class ConfigurationController {
     }
 
     @FXML
-    private void handleCancel() {
+    protected void handleCancel() {
         this.configurationInterface.close();
     }
 
     @FXML
-    private void handleConfirm() {
+    protected void handleConfirm() {
         if (this.hostTextField.getText().isEmpty()) {
             return;
         }

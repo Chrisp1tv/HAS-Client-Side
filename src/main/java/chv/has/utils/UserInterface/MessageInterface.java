@@ -25,23 +25,23 @@ import java.io.IOException;
  * @author Christopher Anciaux
  */
 public class MessageInterface {
-    private static final double minPercentageOfScreenSize = 0.2;
+    protected static final double minPercentageOfScreenSize = 0.2;
 
-    private static final double maxPercentageOfScreenSize = 0.8;
+    protected static final double maxPercentageOfScreenSize = 0.8;
 
-    private double xOffset = 0;
+    protected double xOffset = 0;
 
-    private double yOffset = 0;
+    protected double yOffset = 0;
 
-    private MessageInterfaceManager messageInterfaceManager;
+    protected MessageInterfaceManager messageInterfaceManager;
 
-    private Stage stage;
+    protected Stage stage;
 
-    private ShowMessageController controller;
+    protected ShowMessageController controller;
 
-    private Timeline repetitionTimeline;
+    protected Timeline repetitionTimeline;
 
-    private chv.has.model.interfaces.MessageInterface message;
+    protected chv.has.model.interfaces.MessageInterface message;
 
     MessageInterface(MessageInterfaceManager messageInterfaceManager, chv.has.model.interfaces.MessageInterface message) {
         this.messageInterfaceManager = messageInterfaceManager;
@@ -63,7 +63,7 @@ public class MessageInterface {
         }
     }
 
-    private void setUpMessageStage() {
+    protected void setUpMessageStage() {
         this.stage = new Stage();
         this.stage.initStyle(StageStyle.TRANSPARENT);
         this.stage.setTitle(this.messageInterfaceManager.getHas().getI18nMessages().getString("applicationTitle"));
@@ -71,7 +71,7 @@ public class MessageInterface {
         this.stage.setAlwaysOnTop(true);
     }
 
-    private void setUpController() {
+    protected void setUpController() {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setResources(this.messageInterfaceManager.getHas().getI18nMessages());
@@ -93,7 +93,7 @@ public class MessageInterface {
         }
     }
 
-    private void setUpInterface(BorderPane view) {
+    protected void setUpInterface(BorderPane view) {
         this.setUpSizeConstraints(view);
         this.makeWindowDraggable(view);
         this.manageMessageRepetition();
@@ -101,7 +101,7 @@ public class MessageInterface {
         this.listenStageHiding();
     }
 
-    private void setUpSizeConstraints(BorderPane view) {
+    protected void setUpSizeConstraints(BorderPane view) {
         Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
         view.setMinHeight(visualBounds.getHeight() * MessageInterface.minPercentageOfScreenSize);
         view.setMinWidth(visualBounds.getWidth() * MessageInterface.minPercentageOfScreenSize);
@@ -109,19 +109,19 @@ public class MessageInterface {
         view.setMaxWidth(visualBounds.getWidth() * MessageInterface.maxPercentageOfScreenSize);
     }
 
-    private void makeWindowDraggable(BorderPane view) {
+    protected void makeWindowDraggable(BorderPane view) {
         view.setOnMousePressed(event -> {
             this.xOffset = this.stage.getX() - event.getScreenX();
             this.yOffset = this.stage.getY() - event.getScreenY();
         });
 
         view.setOnMouseDragged(event -> {
-            this.stage.setX(event.getScreenX() + xOffset);
-            this.stage.setY(event.getScreenY() + yOffset);
+            this.stage.setX(event.getScreenX() + this.xOffset);
+            this.stage.setY(event.getScreenY() + this.yOffset);
         });
     }
 
-    private void manageMessageRepetition() {
+    protected void manageMessageRepetition() {
         if (null == this.message.getRepetitionFrequency()) {
             this.controller.getCloseForEverButton().setVisible(false);
             this.controller.getCloseForEverButton().setManaged(false);
@@ -130,7 +130,7 @@ public class MessageInterface {
         }
     }
 
-    private void setUpMessageStyle(){
+    protected void setUpMessageStyle() {
         ScrollPane messageContainer = this.controller.getMessageContainer();
         Text messageText = new Text(this.message.getContent());
 
@@ -148,14 +148,14 @@ public class MessageInterface {
         }
     }
 
-    private void listenStageHiding() {
+    protected void listenStageHiding() {
         this.stage.setOnHiding(event -> {
             this.messageInterfaceManager.getHas().getRabbitMQManager().sendMessageStatus(RabbitMQManager.MESSAGE_STATUS_READ, this.message);
             this.stage.setOnHiding(null);
         });
     }
 
-    private void createRepetitionTimeline() {
+    protected void createRepetitionTimeline() {
         this.repetitionTimeline = new Timeline(new KeyFrame(Duration.minutes(this.message.getRepetitionFrequency()), event -> {
             if (this.message.isEnded()) {
                 this.repetitionTimeline.stop();

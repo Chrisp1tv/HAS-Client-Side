@@ -4,14 +4,14 @@ package chv.has.model.communications;
  * @author Christopher Anciaux
  */
 public class Registration {
-    private String name;
+    protected String name;
 
     public Registration(String name) {
         this.name = name;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {

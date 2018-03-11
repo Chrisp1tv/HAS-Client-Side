@@ -6,8 +6,8 @@ import chv.has.utils.Logger;
 import chv.has.utils.RabbitMQConfigurationManager;
 import chv.has.utils.RabbitMQManager;
 import chv.has.utils.SystemTrayManager;
-import chv.has.utils.UserInterface.ErrorsInterfaceManager;
 import chv.has.utils.UserInterface.ConfigurationInterfaceManager;
+import chv.has.utils.UserInterface.ErrorsInterfaceManager;
 import chv.has.utils.UserInterface.MessageInterfaceManager;
 import dorkbox.systemTray.SystemTray;
 import javafx.application.Application;
@@ -21,17 +21,17 @@ import java.util.ResourceBundle;
  * @author Christopher Anciaux
  */
 public class HAS extends Application {
-    private SystemTray systemTray;
+    protected SystemTray systemTray;
 
-    private RabbitMQConfiguration rabbitMQConfiguration;
+    protected RabbitMQConfiguration rabbitMQConfiguration;
 
-    private RabbitMQManager rabbitMQManager;
+    protected RabbitMQManager rabbitMQManager;
 
-    private MessageInterfaceManager messageInterfaceManager;
+    protected MessageInterfaceManager messageInterfaceManager;
 
-    private ConfigurationInterfaceManager configurationInterfaceManager;
+    protected ConfigurationInterfaceManager configurationInterfaceManager;
 
-    private ResourceBundle i18nMessages;
+    protected ResourceBundle i18nMessages;
 
     public static void main(String[] args) {
         Application.launch(args);
@@ -59,12 +59,12 @@ public class HAS extends Application {
         return this.i18nMessages;
     }
 
-    private void setUpInterface() {
+    protected void setUpInterface() {
         this.messageInterfaceManager = new MessageInterfaceManager(this);
         this.configurationInterfaceManager = new ConfigurationInterfaceManager(this);
     }
 
-    private void setUpSystemTray() {
+    protected void setUpSystemTray() {
         this.systemTray = SystemTray.get();
         if (null == this.systemTray) {
             ErrorsInterfaceManager.displayGeneralErrorAlert(this.i18nMessages);
@@ -73,7 +73,7 @@ public class HAS extends Application {
         SystemTrayManager.setUpSystemTray(this.systemTray, this.getActionPerformedOnAbout(), this.getActionPerformedOnConfiguration(), this.getActionPerformedOnQuit(), this.getI18nMessages(), this.getRabbitMQManager());
     }
 
-    private void setUpRabbitMQ() {
+    protected void setUpRabbitMQ() {
         this.rabbitMQConfiguration = RabbitMQConfigurationManager.loadRabbitMQConfiguration();
         this.rabbitMQManager = new RabbitMQManager(this.getRabbitMQConfiguration());
 
@@ -97,15 +97,15 @@ public class HAS extends Application {
         }
     }
 
-    private ActionListener getActionPerformedOnAbout() {
+    protected ActionListener getActionPerformedOnAbout() {
         return e -> Platform.runLater(() -> this.configurationInterfaceManager.showAbout());
     }
 
-    private ActionListener getActionPerformedOnConfiguration() {
+    protected ActionListener getActionPerformedOnConfiguration() {
         return e -> Platform.runLater(() -> this.configurationInterfaceManager.showConfiguration());
     }
 
-    private ActionListener getActionPerformedOnQuit() {
+    protected ActionListener getActionPerformedOnQuit() {
         return e -> {
             this.systemTray.shutdown();
             this.rabbitMQManager.disconnect();

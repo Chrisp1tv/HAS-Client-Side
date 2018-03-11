@@ -8,17 +8,17 @@ import java.util.Date;
  * @author Christopher Anciaux
  */
 public class Message implements MessageInterface {
-    private int id;
+    protected int id;
 
-    private String content;
+    protected String content;
 
-    private String color;
+    protected String color;
 
-    private boolean bold;
+    protected boolean bold;
 
-    private Date endDate;
+    protected Date endDate;
 
-    private Integer repetitionFrequency;
+    protected Integer repetitionFrequency;
 
     public Message(int id, String content, String color, boolean bold, Date endDate, int repetitionFrequency) {
         this.id = id;
@@ -65,12 +65,15 @@ public class Message implements MessageInterface {
         return this.endDate;
     }
 
-    public boolean isEnded() {
-        return null == this.getEndDate() || 0 >= this.getEndDate().compareTo(new Date());
-    }
-
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    /**
+     * @return True is the message shouldn't be shown, false otherwise
+     */
+    public boolean isEnded() {
+        return null == this.getEndDate() || 0 >= this.getEndDate().compareTo(new Date());
     }
 
     public Integer getRepetitionFrequency() {

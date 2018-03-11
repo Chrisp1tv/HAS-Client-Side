@@ -8,9 +8,9 @@ import java.io.*;
  * @author Christopher Anciaux
  */
 abstract public class RabbitMQConfigurationManager {
-    private static final File CONFIGURATION_FILE = new File(System.getProperty("user.home") + File.separator + ".has" + File.separator + "hasConfiguration");
+    protected static final File CONFIGURATION_FILE = new File(System.getProperty("user.home") + File.separator + ".has" + File.separator + "hasConfiguration");
 
-    private static final String DEFAULT_USER_NAME = System.getProperty("user.name");
+    protected static final String DEFAULT_USER_NAME = System.getProperty("user.name");
 
     public static RabbitMQConfiguration loadRabbitMQConfiguration() {
         if (!RabbitMQConfigurationManager.CONFIGURATION_FILE.exists() || !RabbitMQConfigurationManager.CONFIGURATION_FILE.isFile()) {
@@ -44,7 +44,7 @@ abstract public class RabbitMQConfigurationManager {
         objectOutputStream.close();
     }
 
-    private static RabbitMQConfiguration getDefaultRabbitMQConfiguration() {
+    protected static RabbitMQConfiguration getDefaultRabbitMQConfiguration() {
         return new RabbitMQConfiguration(RabbitMQConfigurationManager.DEFAULT_USER_NAME);
     }
 }

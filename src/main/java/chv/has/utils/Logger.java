@@ -12,9 +12,9 @@ import java.util.logging.SimpleFormatter;
  * @author Christopher Anciaux
  */
 abstract public class Logger {
-    private static final String LOGS_PATH = "%h/.has/logs.log";
+    protected static final String LOGS_PATH = "%h/.has/logs.log";
 
-    private static java.util.logging.Logger logger;
+    protected static java.util.logging.Logger logger;
 
     public static void log(String message) {
         Logger.log(Level.INFO, message);
@@ -32,7 +32,7 @@ abstract public class Logger {
         Logger.logger.log(level, message);
     }
 
-    private static void setUpLogger() {
+    protected static void setUpLogger() {
         Logger.logger = java.util.logging.Logger.getLogger(HAS.class.getName());
         Logger.logger.setUseParentHandlers(false);
 

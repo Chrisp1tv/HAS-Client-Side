@@ -15,15 +15,17 @@ import java.io.Serializable;
  * @author Christopher Anciaux
  */
 public class RabbitMQConfiguration implements Serializable {
-    private StringProperty host;
+    protected static final long serialVersionUID = 4172745486348076636L;
 
-    private int id;
+    protected StringProperty host;
 
-    private String identificationName;
+    protected int id;
 
-    private BooleanProperty registered;
+    protected String identificationName;
 
-    private String subscribedQueueName;
+    protected BooleanProperty registered;
+
+    protected String subscribedQueueName;
 
     public RabbitMQConfiguration(String identificationName) {
         this.initialize();
@@ -32,15 +34,15 @@ public class RabbitMQConfiguration implements Serializable {
     }
 
     public String getHost() {
-        return host.get();
-    }
-
-    public StringProperty hostProperty() {
-        return host;
+        return this.host.get();
     }
 
     public void setHost(String host) {
         this.host.set(host);
+    }
+
+    public StringProperty hostProperty() {
+        return this.host;
     }
 
     public int getId() {
@@ -52,7 +54,7 @@ public class RabbitMQConfiguration implements Serializable {
     }
 
     public String getIdentificationName() {
-        return identificationName;
+        return this.identificationName;
     }
 
     public void setIdentificationName(String identificationName) {
@@ -60,31 +62,31 @@ public class RabbitMQConfiguration implements Serializable {
     }
 
     public boolean isRegistered() {
-        return registered.get();
-    }
-
-    public BooleanProperty registeredProperty() {
-        return registered;
+        return this.registered.get();
     }
 
     public void setRegistered(boolean registered) {
         this.registered.set(registered);
     }
 
+    public BooleanProperty registeredProperty() {
+        return this.registered;
+    }
+
     public String getSubscribedQueueName() {
-        return subscribedQueueName;
+        return this.subscribedQueueName;
     }
 
     public void setSubscribedQueueName(String subscribedQueueName) {
         this.subscribedQueueName = subscribedQueueName;
     }
 
-    private void initialize() {
+    protected void initialize() {
         this.host = new SimpleStringProperty();
         this.registered = new SimpleBooleanProperty();
     }
 
-    private void writeObject(ObjectOutputStream objectOutputStream) throws IOException {
+    protected void writeObject(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(this.getHost());
         objectOutputStream.writeInt(this.getId());
         objectOutputStream.writeObject(this.getIdentificationName());
@@ -92,7 +94,7 @@ public class RabbitMQConfiguration implements Serializable {
         objectOutputStream.writeObject(this.getSubscribedQueueName());
     }
 
-    private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
+    protected void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
         this.initialize();
         this.setHost((String) objectInputStream.readObject());
         this.setId(objectInputStream.readInt());
