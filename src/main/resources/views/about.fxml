@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" styleClass="root-container,about-view"
-            xmlns="http://javafx.com/javafx/8.0.112-ea" fx:controller="chv.has.controllers.ConfigurationController">
+            xmlns="http://javafx.com/javafx/8.0.112-ea">
     <center>
         <VBox styleClass="about-view-box">
             <ImageView>

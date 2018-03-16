@@ -1,5 +1,6 @@
 package chv.has.utils;
 
+import chv.has.HAS;
 import chv.has.exceptions.DisconnectedException;
 import chv.has.exceptions.RegistrationFailedException;
 import chv.has.model.Message;
@@ -15,7 +16,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -25,8 +28,6 @@ import java.util.concurrent.TimeoutException;
  * @author Christopher Anciaux
  */
 public class RabbitMQManager {
-    public static final String DEFAULT_SERVER_HOST = "localhost";
-
     public static final String MESSAGE_STATUS_RECEIVED = "received";
 
     public static final String MESSAGE_STATUS_READ = "seen";
@@ -44,8 +45,6 @@ public class RabbitMQManager {
     protected Channel RabbitMQChannel;
 
     protected BooleanProperty connected;
-
-    protected boolean hostPropertyListened;
 
     public RabbitMQManager(RabbitMQConfiguration configuration) {
         this.configuration = configuration;
@@ -149,15 +148,17 @@ public class RabbitMQManager {
     }
 
     protected void initialize() {
-        this.listenHostChanges();
-
         try {
             if (null != this.RabbitMQConnection && null != this.RabbitMQChannel) {
                 this.disconnect(false);
             }
 
+            InputStream inputStream = HAS.class.getResourceAsStream("/rabbitmq_config/rabbitmq_config.properties");
+            Properties p = new Properties();
+            p.load(inputStream);
+
             ConnectionFactory connectionFactory = new ConnectionFactory();
-            connectionFactory.setHost(this.configuration.getHost());
+            connectionFactory.setUri(p.getProperty("rabbitmq_uri"));
 
             this.RabbitMQConnection = connectionFactory.newConnection();
             this.RabbitMQChannel = this.RabbitMQConnection.createChannel();
@@ -172,15 +173,6 @@ public class RabbitMQManager {
             Logger.logException(exception);
             this.setConnected(false);
         }
-    }
-
-    protected void listenHostChanges() {
-        if (this.hostPropertyListened) {
-            return;
-        }
-
-        this.configuration.hostProperty().addListener((observable, oldValue, newValue) -> this.initialize());
-        this.hostPropertyListened = true;
     }
 
     protected String getRegistrationJSON(String identificationName) {

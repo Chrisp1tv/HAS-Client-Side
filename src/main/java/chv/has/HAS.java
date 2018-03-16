@@ -6,7 +6,7 @@ import chv.has.utils.Logger;
 import chv.has.utils.RabbitMQConfigurationManager;
 import chv.has.utils.RabbitMQManager;
 import chv.has.utils.SystemTrayManager;
-import chv.has.utils.UserInterface.ConfigurationInterfaceManager;
+import chv.has.utils.UserInterface.AboutInterfaceManager;
 import chv.has.utils.UserInterface.ErrorsInterfaceManager;
 import chv.has.utils.UserInterface.MessageInterfaceManager;
 import dorkbox.systemTray.SystemTray;
@@ -27,9 +27,9 @@ public class HAS extends Application {
 
     protected RabbitMQManager rabbitMQManager;
 
-    protected MessageInterfaceManager messageInterfaceManager;
+    protected AboutInterfaceManager aboutInterfaceManager;
 
-    protected ConfigurationInterfaceManager configurationInterfaceManager;
+    protected MessageInterfaceManager messageInterfaceManager;
 
     protected ResourceBundle i18nMessages;
 
@@ -60,8 +60,8 @@ public class HAS extends Application {
     }
 
     protected void setUpInterface() {
+        this.aboutInterfaceManager = new AboutInterfaceManager(this);
         this.messageInterfaceManager = new MessageInterfaceManager(this);
-        this.configurationInterfaceManager = new ConfigurationInterfaceManager(this);
     }
 
     protected void setUpSystemTray() {
@@ -70,7 +70,7 @@ public class HAS extends Application {
             ErrorsInterfaceManager.displayGeneralErrorAlert(this.i18nMessages);
         }
 
-        SystemTrayManager.setUpSystemTray(this.systemTray, this.getActionPerformedOnAbout(), this.getActionPerformedOnConfiguration(), this.getActionPerformedOnQuit(), this.getI18nMessages(), this.getRabbitMQManager());
+        SystemTrayManager.setUpSystemTray(this.systemTray, this.getActionPerformedOnAbout(), this.getActionPerformedOnQuit(), this.getI18nMessages(), this.getRabbitMQManager());
     }
 
     protected void setUpRabbitMQ() {
@@ -98,11 +98,7 @@ public class HAS extends Application {
     }
 
     protected ActionListener getActionPerformedOnAbout() {
-        return e -> Platform.runLater(() -> this.configurationInterfaceManager.showAbout());
-    }
-
-    protected ActionListener getActionPerformedOnConfiguration() {
-        return e -> Platform.runLater(() -> this.configurationInterfaceManager.showConfiguration());
+        return e -> Platform.runLater(() -> this.aboutInterfaceManager.showAbout());
     }
 
     protected ActionListener getActionPerformedOnQuit() {

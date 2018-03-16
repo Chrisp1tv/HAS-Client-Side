@@ -15,21 +15,18 @@ abstract public class SystemTrayManager {
 
     protected final static String DISCONNECTED_ICON_PATH = "/icons/disconnected-icon.png";
 
-    public static void setUpSystemTray(SystemTray systemTray, ActionListener actionPerformedOnAbout,
-                                       ActionListener actionPerformedOnConfiguration, ActionListener actionPerformedOnQuit,
+    public static void setUpSystemTray(SystemTray systemTray, ActionListener actionPerformedOnAbout, ActionListener actionPerformedOnQuit,
                                        ResourceBundle i18nMessages,
                                        RabbitMQManager rabbitMQManager) {
         SwingUtil.setLookAndFeel(null);
 
-        SystemTrayManager.setUpSystemTrayMenu(systemTray, actionPerformedOnAbout, actionPerformedOnConfiguration, actionPerformedOnQuit, i18nMessages);
+        SystemTrayManager.setUpSystemTrayMenu(systemTray, actionPerformedOnAbout, actionPerformedOnQuit, i18nMessages);
         SystemTrayManager.setUpIcon(systemTray, rabbitMQManager);
     }
 
-    protected static void setUpSystemTrayMenu(final SystemTray systemTray, ActionListener actionPerformedOnAbout,
-                                              ActionListener actionPerformedOnConfiguration, ActionListener actionPerformedOnQuit,
+    protected static void setUpSystemTrayMenu(final SystemTray systemTray, ActionListener actionPerformedOnAbout, ActionListener actionPerformedOnQuit,
                                               ResourceBundle i18nMessages) {
         systemTray.getMenu().add(new MenuItem(i18nMessages.getString("about"), actionPerformedOnAbout));
-        systemTray.getMenu().add(new MenuItem(i18nMessages.getString("configuration"), actionPerformedOnConfiguration));
         systemTray.getMenu().add(new MenuItem(i18nMessages.getString("quit"), actionPerformedOnQuit));
     }
 
