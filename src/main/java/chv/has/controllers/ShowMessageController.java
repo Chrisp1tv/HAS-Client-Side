@@ -3,7 +3,7 @@ package chv.has.controllers;
 import chv.has.utils.UserInterface.MessageInterface;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.web.WebView;
 
 /**
  * @author Christopher Anciaux
@@ -12,12 +12,12 @@ public class ShowMessageController {
     protected MessageInterface userInterface;
 
     @FXML
-    protected ScrollPane messageContainer;
+    protected WebView messageContainer;
 
     @FXML
     protected Button closeForEverButton;
 
-    public ScrollPane getMessageContainer() {
+    public WebView getMessageContainer() {
         return this.messageContainer;
     }
 

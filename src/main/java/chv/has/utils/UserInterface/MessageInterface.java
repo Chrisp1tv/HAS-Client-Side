@@ -9,11 +9,10 @@ import javafx.animation.Timeline;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
+import javafx.scene.web.WebView;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -27,6 +26,8 @@ import java.io.IOException;
 public class MessageInterface {
     protected static final double minPercentageOfScreenSize = 0.2;
 
+    protected static final double medianPercentageOfScreenSize = 0.5;
+
     protected static final double maxPercentageOfScreenSize = 0.8;
 
     protected double xOffset = 0;
@@ -36,6 +37,8 @@ public class MessageInterface {
     protected MessageInterfaceManager messageInterfaceManager;
 
     protected Stage stage;
+
+    protected BorderPane rootElement;
 
     protected ShowMessageController controller;
 
@@ -48,7 +51,6 @@ public class MessageInterface {
         this.message = message;
         this.setUpMessageStage();
         this.setUpController();
-        this.stage.show();
     }
 
     public void close(boolean forEver) {
@@ -85,7 +87,9 @@ public class MessageInterface {
             this.controller = loader.getController();
             this.controller.setUserInterface(this);
 
-            this.setUpInterface(view);
+            this.rootElement = view;
+
+            this.setUpInterface();
             this.stage.setScene(scene);
         } catch (IOException exception) {
             ErrorsInterfaceManager.displayGeneralErrorAlert(this.messageInterfaceManager.getHas().getI18nMessages());
@@ -93,29 +97,31 @@ public class MessageInterface {
         }
     }
 
-    protected void setUpInterface(BorderPane view) {
-        this.setUpSizeConstraints(view);
-        this.makeWindowDraggable(view);
+    protected void setUpInterface() {
+        this.setUpSizeConstraints();
+        this.makeWindowDraggable();
         this.manageMessageRepetition();
         this.setUpMessageStyle();
         this.listenStageHiding();
     }
 
-    protected void setUpSizeConstraints(BorderPane view) {
+    protected void setUpSizeConstraints() {
         Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-        view.setMinHeight(visualBounds.getHeight() * MessageInterface.minPercentageOfScreenSize);
-        view.setMinWidth(visualBounds.getWidth() * MessageInterface.minPercentageOfScreenSize);
-        view.setMaxHeight(visualBounds.getHeight() * MessageInterface.maxPercentageOfScreenSize);
-        view.setMaxWidth(visualBounds.getWidth() * MessageInterface.maxPercentageOfScreenSize);
+
+        this.rootElement.setMinHeight(visualBounds.getHeight() * MessageInterface.minPercentageOfScreenSize);
+        this.rootElement.setMaxHeight(visualBounds.getHeight() * MessageInterface.maxPercentageOfScreenSize);
+
+        this.rootElement.setMinWidth(visualBounds.getWidth() * MessageInterface.medianPercentageOfScreenSize);
+        this.rootElement.setMaxWidth(visualBounds.getWidth() * MessageInterface.medianPercentageOfScreenSize);
     }
 
-    protected void makeWindowDraggable(BorderPane view) {
-        view.setOnMousePressed(event -> {
+    protected void makeWindowDraggable() {
+        this.rootElement.setOnMousePressed(event -> {
             this.xOffset = this.stage.getX() - event.getScreenX();
             this.yOffset = this.stage.getY() - event.getScreenY();
         });
 
-        view.setOnMouseDragged(event -> {
+        this.rootElement.setOnMouseDragged(event -> {
             this.stage.setX(event.getScreenX() + this.xOffset);
             this.stage.setY(event.getScreenY() + this.yOffset);
         });
@@ -131,21 +137,18 @@ public class MessageInterface {
     }
 
     protected void setUpMessageStyle() {
-        ScrollPane messageContainer = this.controller.getMessageContainer();
-        Text messageText = new Text(this.message.getContent());
+        WebView messageContainer = this.controller.getMessageContainer();
+        messageContainer.getEngine().setUserStyleSheetLocation(HAS.class.getResource("/webview-styles.css").toString());
+        messageContainer.getEngine().loadContent(this.getWrappedContent());
 
-        messageContainer.widthProperty().addListener((observable, oldValue, newValue) -> messageText.setWrappingWidth(newValue.intValue() - 15));
-        messageContainer.setContent(messageText);
+        messageContainer.getEngine().documentProperty().addListener((prop, oldDoc, newDoc) -> {
+            messageContainer.setPrefHeight(Double.parseDouble(messageContainer.getEngine().executeScript("document.height").toString()));
+            this.stage.show();
+        });
+    }
 
-        if (null != this.message.getColor()) {
-            messageContainer.getContent().setStyle("-fx-fill: " + this.message.getColor() + ";");
-        }
-
-        if (this.message.isBold()) {
-            messageContainer.getStyleClass().add("bold");
-        } else {
-            messageContainer.getStyleClass().remove("bold");
-        }
+    protected String getWrappedContent() {
+        return "<body style=\"width:" + (this.rootElement.getMaxWidth() - 40) + "px;\">" + this.message.getContent() + "</body>";
     }
 
     protected void listenStageHiding() {

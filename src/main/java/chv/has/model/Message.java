@@ -12,19 +12,13 @@ public class Message implements MessageInterface {
 
     protected String content;
 
-    protected String color;
-
-    protected boolean bold;
-
     protected Date endDate;
 
     protected Integer repetitionFrequency;
 
-    public Message(int id, String content, String color, boolean bold, Date endDate, int repetitionFrequency) {
+    public Message(int id, String content, Date endDate, int repetitionFrequency) {
         this.id = id;
         this.content = content;
-        this.color = color;
-        this.bold = bold;
         this.endDate = endDate;
         this.repetitionFrequency = repetitionFrequency;
     }
@@ -43,22 +37,6 @@ public class Message implements MessageInterface {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public String getColor() {
-        return this.color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public boolean isBold() {
-        return this.bold;
-    }
-
-    public void setBold(boolean bold) {
-        this.bold = bold;
     }
 
     public Date getEndDate() {

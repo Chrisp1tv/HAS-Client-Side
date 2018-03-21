@@ -1,0 +1,9 @@
+body {
+    margin: 0;
+    background: #f7f7f7;
+    font: 13px "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+body * {
+    max-width: 99%;
+}

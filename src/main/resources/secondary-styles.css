@@ -1,5 +1,6 @@
 .root {
     -fx-padding: 8px;
+    -fx-font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 
 .root-container {

@@ -14,14 +14,6 @@ public interface MessageInterface {
 
     void setContent(String content);
 
-    String getColor();
-
-    void setColor(String color);
-
-    boolean isBold();
-
-    void setBold(boolean bold);
-
     Date getEndDate();
 
     void setEndDate(Date endDate);
