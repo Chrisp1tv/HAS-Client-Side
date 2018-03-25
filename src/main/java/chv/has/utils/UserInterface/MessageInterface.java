@@ -139,12 +139,17 @@ public class MessageInterface {
     protected void setUpMessageStyle() {
         WebView messageContainer = this.controller.getMessageContainer();
         messageContainer.getEngine().setUserStyleSheetLocation(HAS.class.getResource("/webview-styles.css").toString());
-        messageContainer.getEngine().loadContent(this.getWrappedContent());
 
         messageContainer.getEngine().documentProperty().addListener((prop, oldDoc, newDoc) -> {
-            messageContainer.setPrefHeight(Double.parseDouble(messageContainer.getEngine().executeScript("document.height").toString()));
-            this.stage.show();
+            try {
+                messageContainer.setPrefHeight(Double.parseDouble(messageContainer.getEngine().executeScript("window.getComputedStyle(document.body, null).getPropertyValue('height')").toString().replace("px", "")));
+                this.stage.show();
+            } catch (Exception e) {
+                Logger.logException(e);
+            }
         });
+
+        messageContainer.getEngine().loadContent(this.getWrappedContent());
     }
 
     protected String getWrappedContent() {
